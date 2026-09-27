@@ -6,8 +6,9 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
-// FIXME: Multi-viewports is not yet functional in this example. May need backend rework/coordination.
+// FIXME: Multi-viewports is not yet functional in this example: backend and render code would set to set current context.
 
+#define GL_SILENCE_DEPRECATION
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
@@ -34,7 +35,7 @@
 
 #ifndef DEBUG
     GLint swapInterval = 1;
-    [[self openGLContext] setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
+    [[self openGLContext] setValues:&swapInterval forParameter:NSOpenGLContextParameterSwapInterval];
     if (swapInterval == 0)
         NSLog(@"Error: Cannot set swap interval.");
 #endif
@@ -142,8 +143,8 @@
     ImDrawData* draw_data = ImGui::GetDrawData();
 
     [[self openGLContext] makeCurrentContext];
-    GLsizei width  = (GLsizei)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
-    GLsizei height = (GLsizei)(draw_data->DisplaySize.y * draw_data->FramebufferScale.y);
+    GLsizei width  = (GLsizei)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x + 0.5f);
+    GLsizei height = (GLsizei)(draw_data->DisplaySize.y * draw_data->FramebufferScale.y + 0.5f);
     glViewport(0, 0, width, height);
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);

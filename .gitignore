@@ -1,2 +1,5 @@
 build/
-.xmake/
+.cache/
+compile_commands.json
+*.spv
+config/imgui.ini
