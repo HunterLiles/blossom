@@ -1,4 +1,3 @@
+/.cache/
 /build/
-/imgui.ini
-*.md
-!/README.md
+.clang-format

@@ -1,41 +1,29 @@
-cmake_minimum_required(VERSION 3.20)
-project(blossom_vulkan LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.24)
+project(
+  blossom
+  VERSION 0.1.0
+  LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+include(FetchContent)
+find_package(Vulkan REQUIRED COMPONENTS glslc)
 
-find_package(Vulkan REQUIRED)
-find_package(glfw3 REQUIRED)
-find_program(GLSLC glslc REQUIRED)
+include(cmake/GLFW.cmake)
 include(cmake/ImGui.cmake)
+include(cmake/Shaders.cmake)
 
-set(SHADER_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
-set(SHADERS
-  "${SHADER_OUTPUT_DIR}/cube.vert.spv"
-  "${SHADER_OUTPUT_DIR}/cube.frag.spv"
-  "${SHADER_OUTPUT_DIR}/grid.vert.spv"
-  "${SHADER_OUTPUT_DIR}/grid.frag.spv"
-)
-add_custom_command(
-  OUTPUT ${SHADERS}
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${SHADER_OUTPUT_DIR}"
-  COMMAND ${GLSLC} -fshader-stage=vert --target-env=vulkan1.0 "${CMAKE_CURRENT_SOURCE_DIR}/shaders/cube.vert.hlsl" -o "${SHADER_OUTPUT_DIR}/cube.vert.spv"
-  COMMAND ${GLSLC} -fshader-stage=frag --target-env=vulkan1.0 "${CMAKE_CURRENT_SOURCE_DIR}/shaders/cube.frag.hlsl" -o "${SHADER_OUTPUT_DIR}/cube.frag.spv"
-  COMMAND ${GLSLC} -fshader-stage=vert --target-env=vulkan1.0 "${CMAKE_CURRENT_SOURCE_DIR}/shaders/grid.vert.hlsl" -o "${SHADER_OUTPUT_DIR}/grid.vert.spv"
-  COMMAND ${GLSLC} -fshader-stage=frag --target-env=vulkan1.0 "${CMAKE_CURRENT_SOURCE_DIR}/shaders/grid.frag.hlsl" -o "${SHADER_OUTPUT_DIR}/grid.frag.spv"
-  DEPENDS shaders/cube.vert.hlsl shaders/cube.frag.hlsl shaders/grid.vert.hlsl shaders/grid.frag.hlsl
-  VERBATIM
-)
-add_custom_target(shaders DEPENDS ${SHADERS})
+add_executable(blossom src/main.cpp src/Input.cpp src/Interface.cpp
+                       src/Renderer.cpp src/WorkspaceLayout.cpp)
+target_compile_features(blossom PRIVATE cxx_std_20)
+set_target_properties(blossom PROPERTIES CXX_EXTENSIONS OFF)
+target_include_directories(blossom PRIVATE include)
+target_link_libraries(blossom PRIVATE Vulkan::Vulkan glfw imgui)
+target_compile_definitions(
+  blossom
+  PRIVATE GLFW_INCLUDE_NONE GLFW_INCLUDE_VULKAN
+          "SHADER_DIRECTORY=\"${SHADER_OUTPUT_DIRECTORY}\""
+          "LAYOUT_DIRECTORY=\"${CMAKE_CURRENT_SOURCE_DIR}/layouts\"")
+add_dependencies(blossom shaders)
 
-add_executable(blossom_vulkan main.cpp)
-add_dependencies(blossom_vulkan shaders)
-target_include_directories(blossom_vulkan PRIVATE include)
-target_link_libraries(blossom_vulkan PRIVATE Vulkan::Vulkan glfw imgui)
-target_compile_definitions(blossom_vulkan PRIVATE
-  SHADER_DIRECTORY="${SHADER_OUTPUT_DIR}"
-  ENGINE_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}"
-  NEOVIM_CONFIG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/editor/nvim/init.lua"
-)
+if(WIN32)
+  target_compile_definitions(blossom PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
+endif()

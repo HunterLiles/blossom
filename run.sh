@@ -1,5 +1,10 @@
-#! /bin/zsh
+#!/usr/bin/env bash
+set -euo pipefail
 
-cmake -S . -B build && cmake --build build
-printf "\rApplication running..."
-./build/blossom_vulkan
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+
+cmake -S . -B build
+cmake --build build --parallel
+
+cd build
+exec ./blossom "$@"
