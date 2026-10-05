@@ -1,11 +1,13 @@
-# Blossom
+# 3D Game Engine
 
-An experimental 3D game engine for testing, measuring, and comparing rendering techniques and engine architectures in a common environment.
+This is a 3D game engine written in C++ and GLSL using Vulkan, Dear ImGui, and GLFW. It currently renders a cube in separate scene and game views, with a grid in the scene view and cube animation in the game view. Both views have camera controls, and the interface lets you inspect the cube, change its position, adjust ambient lighting, and reload shaders while the engine is running. The math library is completely custom.
 
-Rendering approaches:
-- Rasterization (Vulkan)
-- Signed distance field ray marching
-- Voxel ray traversal
-- CPU rasterizer (no external dependencies)
+## Screenshots
 
-Stack: C++, custom math library, Vulkan 1.4, HLSL, GLFW, Dear ImGui. Targets Windows and Linux.
+### Scene view
+
+![Blossom scene view](screenshots/scene-view.png)
+
+### Game view
+
+![Blossom game view](screenshots/game-view.png)
